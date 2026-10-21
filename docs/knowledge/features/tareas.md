@@ -10,6 +10,7 @@ Lo que ve y puede hacer el usuario con sus tareas. Todo pasa en dos pantallas: l
 - Cada tarea muestra:
   - un botón redondo para completarla o reabrirla;
   - su título;
+  - su fecha límite, si tiene, debajo del título: «Fecha límite: 30/10/2026». Las tareas sin fecha no muestran nada;
   - la etiqueta «Completada», si lo está;
   - un enlace para editarla y un botón para eliminarla.
 - Los botones solo tienen icono, y su nombre accesible incluye el título: «Completar tarea: Comprar pan», «Reabrir tarea: …», «Editar tarea: …», «Eliminar tarea: …».
@@ -26,17 +27,27 @@ Las comprueba `Task.Validate` al crear y al editar:
 
 Antes de guardar, la acción quita los espacios del principio y del final. Los campos de título del navegador tienen también `maxlength="200"`.
 
+## Reglas de la fecha límite
+
+Es opcional y es solo una fecha, sin hora. En los formularios se escribe con un campo de fecha del navegador y el servidor solo acepta `AAAA-MM-DD`. Se admite cualquier fecha válida, también una pasada. La comprueba `Task.Validate` al crear y al editar:
+
+| Regla | Mensaje si no se cumple |
+| --- | --- |
+| Si se indica, es una fecha válida en formato `AAAA-MM-DD` (no valen una hora, `30/10/2026` ni `2026-02-30`) | «La fecha límite no es una fecha válida.» |
+
+Un campo vacío, o solo con espacios, significa sin fecha límite.
+
 ## Añadir
 
-- El formulario está debajo de la lista: el campo «Nueva tarea», con el texto de ayuda «Añadir una tarea…», y el botón «Añadir».
-- Si el título es válido, la tarea se crea pendiente, aparece al final de la lista y sale el aviso «Tarea creada.».
-- Si no, la lista se vuelve a mostrar con `422`: el campo conserva lo escrito, queda marcado como inválido y el mensaje sale debajo.
+- El formulario está debajo de la lista: el campo «Nueva tarea», con el texto de ayuda «Añadir una tarea…», el campo de fecha «Fecha límite (opcional)» y el botón «Añadir».
+- Si el título y la fecha son válidos, la tarea se crea pendiente, con su fecha límite si se indicó, aparece al final de la lista y sale el aviso «Tarea creada.».
+- Si no, la lista se vuelve a mostrar con `422`: los campos conservan lo escrito (título y fecha), el campo que falla queda marcado como inválido y el mensaje sale debajo del formulario.
 
 ## Editar
 
-- Se llega desde el enlace de editar de cada tarea. La pantalla tiene el enlace «← Volver a la lista», el título «Editar tarea» y el campo «Título» con el título actual. Debajo, la ayuda: «Hasta 200 caracteres. Los demás datos de la tarea no cambian.».
-- «Guardar cambios» cambia solo el título: si la tarea estaba completada, lo sigue estando. Después vuelve a la lista con el aviso «Tarea actualizada.».
-- Con un título inválido, la pantalla se vuelve a mostrar con `422` y el mensaje. «Cancelar» vuelve a la lista sin cambiar nada.
+- Se llega desde el enlace de editar de cada tarea. La pantalla tiene el enlace «← Volver a la lista», el título «Editar tarea» y el campo «Título» con el título actual. Debajo, la ayuda: «Hasta 200 caracteres. Los demás datos de la tarea no cambian.». Después, el campo «Fecha límite» con la fecha actual (vacío si no tiene) y la ayuda «Opcional. Déjala vacía para quitarla.».
+- «Guardar cambios» cambia el título y la fecha límite: se puede añadir, cambiar o quitar la fecha (vaciando el campo). Si la tarea estaba completada, lo sigue estando. Después vuelve a la lista con el aviso «Tarea actualizada.».
+- Con un título o una fecha inválidos, la pantalla se vuelve a mostrar con `422` y el mensaje. «Cancelar» vuelve a la lista sin cambiar nada.
 - Si la tarea no existe, `404`.
 
 ## Completar y reabrir
